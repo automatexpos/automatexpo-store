@@ -1,55 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- <h2>Your Booked Phones</h2>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Item</th>
-      <th>Price</th>
-      <th>Status</th>
-      <th>Time left</th>
-      <th>Booked At</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for p in phones if p.payment_status != 'Token paid' %}
-    <tr>
-      <td><a href="/phone/{{ p.id }}">{{ p.model }}</a></td>
-      <td>PKR {{ '%.0f'|format(p.price) }}</td>
-      <td>{{ p.payment_status or p.status }}</td>
-      <td>
-        {% if p.status == 'Booked' and p.booking_time %}
-          <span class="countdown" data-deadline="{{ (p.booking_time + countdown_delta).isoformat() }}">—</span>
-        {% else %}
-          —
-        {% endif %}
-      </td>
-      <td>
-        {% if p.booking_time %}
-          {{ p.booking_time.strftime("%m/%d/%Y %I:%M %p") }}
-        {% else %}
-          —
-        {% endif %}
-      </td>
-      <td>
-        {% if p.status == 'Booked' %}
-          <form method="get" action="{{ url_for('payment', phone_id=p.id) }}">
-            <button type="submit" class="btn">Confirm Token Payment</button>
-          </form>
-        {% else %}
-          —
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table> -->
-
-
 <hr>
-
 <h2>Your orders</h2>
 <table class="table">
   <thead>

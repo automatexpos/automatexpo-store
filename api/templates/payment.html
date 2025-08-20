@@ -1,57 +1,61 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card">
-  <h2>Confirm Payment</h2>
-
-  <form method="post" enctype="multipart/form-data">
-    <div class="field">
-      <label>Full Name</label>
-      <input type="text" name="buyer_name" required>
-    </div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" name="buyer_email" required>
-    </div>
-    <div class="field">
-      <label>Phone</label>
-      <input type="text" name="buyer_phone" required>
-    </div>
-    <div class="field">
-      <label>Address</label>
-      <textarea name="buyer_address" required></textarea>
-    </div>
-
-    <hr>
-    <h3>💳 Seller Payment Details</h3>
-    {% if admin %}
-      <div class="field">
-        <p><strong>Seller:</strong> {{ admin.username }}</p>
-        {% if admin.easypaisa_number %}
-          <p><strong>Easypaisa:</strong> {{ admin.easypaisa_number }}</p>
-        {% endif %}
-        {% if admin.bank_name and admin.bank_account %}
-          <p><strong>Bank:</strong> {{ admin.bank_name }} ({{ admin.bank_account }})</p>
-        {% endif %}
-      </div>
+<form method="post" enctype="multipart/form-data">
+<div class="grid payment-grid">
+  <!-- Left: Payment Form -->
+  <div class="card">
+    <h2>Confirm Payment</h2>
 
       <div class="field">
-        <label>Select Payment Method</label><br>
-        {% if admin.easypaisa_number %}
-          <label><input type="radio" name="payment_method" value="easypaisa" required> Easypaisa</label><br>
-        {% endif %}
-        {% if admin.bank_account %}
-          <label><input type="radio" name="payment_method" value="bank" required> Bank Transfer</label><br>
-        {% endif %}
+        <label>Full Name</label>
+        <input type="text" name="buyer_name" required>
       </div>
-    {% endif %}
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="buyer_email" required>
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="text" name="buyer_phone" required>
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input name="buyer_address" required>
+      </div>
 
-    <div class="field">
-      <label>Upload Screenshot of Payment</label>
-      <input type="file" name="receipt" required>
-    </div>
+      <hr>
+      <h3>💳 Seller Payment Details</h3>
+      {% if admin %}
+        <div class="field">
+          <p><strong>Seller:</strong> {{ admin.username }}</p>
+          {% if admin.easypaisa_number %}
+            <p><strong>Easypaisa:</strong> {{ admin.easypaisa_number }}</p>
+          {% endif %}
+          {% if admin.bank_name and admin.bank_account %}
+            <p><strong>Bank:</strong> {{ admin.bank_name }} ({{ admin.bank_account }})</p>
+          {% endif %}
+        </div>
 
-    {% if phones %}
-    <hr>
+        <div class="field">
+          <label>Select Payment Method</label>
+          {% if admin.easypaisa_number %}
+            <label><input type="radio" name="payment_method" value="easypaisa" required> Easypaisa</label>
+          {% endif %}
+          {% if admin.bank_account %}
+            <label><input type="radio" name="payment_method" value="bank" required> Bank Transfer</label>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="field">
+        <label>Upload Screenshot of Payment</label>
+        <input type="file" name="receipt" required>
+      </div>
+  </div>
+
+  <!-- Right: Order Summary -->
+  {% if phones %}
+  <div class="card order-summary">
     <h3>🛒 Order Summary</h3>
     <table class="table">
       <thead>
@@ -79,9 +83,11 @@
         </tr>
       </tfoot>
     </table>
-    {% endif %}
 
-    <button class="btn">Submit Payment</button>
-  </form>
+    <!-- Submit Button under order summary -->
+    <button type="submit" class="btn" style="margin-top: 1rem;">Submit Payment</button>
+  </div>
+  {% endif %}
 </div>
+</form>
 {% endblock %}

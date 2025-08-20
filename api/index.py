@@ -3,7 +3,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from api.supa import supabase, admin_client
+from supa import supabase, admin_client
 import smtplib
 from email.message import EmailMessage
 import random
@@ -498,15 +498,19 @@ def add_to_cart(phone_id):
     return redirect(url_for("view_cart"))
 
 @app.route("/cart")
-
 def view_cart():
     cart_ids = get_cart()
     if not cart_ids:
         phones = []
+        total_price = 0
     else:
         res = supabase.table("phones").select("*").in_("id", cart_ids).execute()
         phones = res.data
-    return render_template("cart.html", phones=phones)
+        # Calculate total
+        total_price = sum(p["price"] for p in phones if "price" in p)
+
+    return render_template("cart.html", phones=phones, total_price=total_price)
+
 
 @app.route("/cart/clear", methods=["POST"])
 def clear_cart():

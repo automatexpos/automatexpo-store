@@ -50,12 +50,13 @@
     <div class="badge">{{ p.condition }}</div>
     <p style="opacity:.85; white-space:pre-wrap">{{ p.specs }}</p>
     <p class="price">PKR {{ '%.0f'|format(p.price) }}</p>
-    <div style="display:flex; gap:5px;">
+    <div class="actions">
       <a href="{{ url_for('phone_detail', phone_id=p.id) }}" class="btn">View</a>
       <form method="post" action="{{ url_for('add_to_cart', phone_id=p.id) }}">
         <button type="submit" class="btn">Add to Cart</button>
       </form>
     </div>
+
   </div>
   {% endfor %}
 </div>

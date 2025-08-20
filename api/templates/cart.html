@@ -3,30 +3,94 @@
 <h2>🛒 Your Cart</h2>
 
 {% if phones %}
-<form method="post" action="{{ url_for('checkout_cart') }}">
-  <table class="table">
-    <thead>
-      <tr><th></th><th>Model</th><th>Price</th></tr>
-    </thead>
-    <tbody>
-      {% for p in phones %}
-      <tr>
-        <td><input type="checkbox" name="selected_items" value="{{ p.id }}"></td>
-        <td>{{ p.model }}</td>
-        <td>{{ p.price }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <button type="submit" class="btn btn-success">Buy Now</button>
-</form>
+<div class="cart-page-container" style="max-width: 1200px; margin: 0 auto; display: flex; gap: 24px; align-items: flex-start; justify-content: flex-start; flex-wrap: wrap;">
 
-<!-- Clear Cart button -->
-<form method="post" action="{{ url_for('clear_cart') }}" style="margin-top: 1rem;">
-  <button type="submit" class="btn btn-danger">Clear Cart</button>
-</form>
+  <!-- Cart Items (Left) -->
+  <div style="flex: 2; min-width: 300px; display: flex; justify-content: flex-start;">
+    <div class="card" style="width: 100%;">
+      <form id="cartForm" method="post" action="{{ url_for('checkout_cart') }}">
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Model</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in phones %}
+            <tr>
+              <td><input type="checkbox" name="selected_items" value="{{ p.id }}" class="item-checkbox"></td>
+              <td>{{ p.model }}</td>
+              <td>PKR {{ p.price }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </form>
+
+      <!-- Clear Cart button -->
+      <form method="post" action="{{ url_for('clear_cart') }}" style="margin-top: 1rem;">
+        <button type="submit" class="btn danger full">Clear Cart</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Summary (Right) -->
+  <div style="flex: 1; min-width: 250px; display: flex; justify-content: flex-start;">
+    <div class="card summary-card" id="orderSummary" style="display: none; width: 100%;">
+      <h3>Order Summary</h3>
+      <ul id="summaryList"></ul>
+      <hr>
+      <p><strong>Total:</strong> PKR <span id="summaryTotal">0</span></p>
+      <button id="buySelectedBtn" type="submit" form="cartForm" class="btn full" style="display: none;">Buy Selected</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const items = {{ phones|tojson }};
+  
+  const checkboxes = document.querySelectorAll('.item-checkbox');
+  const summary = document.getElementById('orderSummary');
+  const summaryList = document.getElementById('summaryList');
+  const summaryTotal = document.getElementById('summaryTotal');
+  const buyBtn = document.getElementById('buySelectedBtn');
+
+  function updateSummary() {
+    summaryList.innerHTML = '';
+    let total = 0;
+    let anyChecked = false;
+
+    checkboxes.forEach(cb => {
+      if(cb.checked) {
+        anyChecked = true;
+        const item = items.find(i => i.id == cb.value); 
+        if(item) {
+          summaryList.innerHTML += `<li>${item.model} — PKR ${item.price}</li>`;
+          total += item.price;
+        }
+      }
+    });
+
+    if(anyChecked) {
+      summary.style.display = 'block';
+      buyBtn.style.display = 'block';
+      summaryTotal.textContent = total;
+    } else {
+      summary.style.display = 'none';
+      buyBtn.style.display = 'none';
+    }
+  }
+
+  checkboxes.forEach(cb => cb.addEventListener('change', updateSummary));
+</script>
 
 {% else %}
-<p>No items in cart.</p>
+<div class="card empty">
+  <p>Your cart is empty 😢</p>
+  <a href="{{ url_for('home') }}" class="btn full">Continue Shopping</a>
+</div>
 {% endif %}
 {% endblock %}
