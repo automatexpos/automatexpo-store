@@ -3,7 +3,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from supa import supabase, admin_client
+from api.supa import supabase, admin_client
 import smtplib
 from email.message import EmailMessage
 import random
