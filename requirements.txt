@@ -1,5 +1,5 @@
-Flask==3.0.3
-python-dotenv==1.0.1
-supabase==2.6.0
-itsdangerous==2.2.0
-werkzeug==3.0.3
+Flask
+python-dotenv
+supabase
+itsdangerous
+werkzeug
