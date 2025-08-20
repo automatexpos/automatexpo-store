@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-card card">
+  <h2>Login</h2>
+  <form method="post">
+    <div class="field">
+      <div class="label">Email</div>
+      <input class="input" type="email" name="email" required>
+    </div>
+    <div class="field">
+      <div class="label">Password</div>
+      <input class="input" type="password" name="password" required>
+    </div>
+    <button class="btn">Login</button>
+  </form>
+  <div style="margin-top:10px">
+    <a href="/reset">Forgot password?</a>
+  </div>
+</div>
+{% endblock %}

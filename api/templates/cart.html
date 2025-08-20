@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>🛒 Your Cart</h2>
+
+{% if phones %}
+<form method="post" action="{{ url_for('checkout_cart') }}">
+  <table class="table">
+    <thead>
+      <tr><th></th><th>Model</th><th>Price</th></tr>
+    </thead>
+    <tbody>
+      {% for p in phones %}
+      <tr>
+        <td><input type="checkbox" name="selected_items" value="{{ p.id }}"></td>
+        <td>{{ p.model }}</td>
+        <td>{{ p.price }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="submit" class="btn btn-success">Buy Now</button>
+</form>
+
+<!-- Clear Cart button -->
+<form method="post" action="{{ url_for('clear_cart') }}" style="margin-top: 1rem;">
+  <button type="submit" class="btn btn-danger">Clear Cart</button>
+</form>
+
+{% else %}
+<p>No items in cart.</p>
+{% endif %}
+{% endblock %}

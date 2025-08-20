@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Review & Verify Payments</h2>
+
+{% if phone %}
+<div class="card">
+  <h3>#{{ phone.id }} — {{ phone.model }}</h3>
+  <p>
+    Buyer: {{ phone.buyer_name or '-' }} <br>
+    Email: {{ phone.buyer_email or '-' }} <br>
+    Phone: {{ phone.buyer_phone or '-' }} <br>
+    Address: {{ phone.buyer_address or '-' }}
+  </p>
+  <p>Status: {{ phone.status }} | Payment: {{ phone.payment_status or '—' }}</p>
+
+  {% if phone.status != 'Sold' %}
+    <form method="post" action="/admin/review/verify/{{ phone.id }}" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn success" name="action" value="full">Mark as Sold</button>
+      <button class="btn secondary" name="action" value="revert">Revert to Available</button>
+    </form>
+  {% else %}
+    <span class="badge">Sold</span>
+  {% endif %}
+
+<h3 style="margin-top:24px">Pending Payments</h3>
+<table class="table">
+  <thead><tr><th>ID</th><th>Item</th><th>Buyer</th><th>Submitted At</th><th>Action</th></tr></thead>
+  <tbody>
+    {% for p in pending %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td>{{ p.model }}</td>
+      <td>{{ p.buyer_email or '-' }}</td>
+      <td>{{ p.purchase_time|format_dt if p.purchase_time else '-' }}</td>
+      <td><a class="btn warn" href="/admin/review?phone_id={{ p.id }}">Open</a></td>
+      <td>
+        {% if p.status != 'Sold' %}
+          <form method="post" action="{{ url_for('mark_sold', phone_id=p.id) }}">
+            <button class="btn success" type="submit">Mark as Sold</button>
+          </form>
+        {% else %}
+          <span class="badge">Sold</span>
+        {% endif %}
+        {% if p.status == 'Sold' %}
+          {% if p.shipping_status == 'Shipped' %}
+            <span class="badge">Already Shipped</span>
+          {% else %}
+            <form method="post" action="{{ url_for('mark_shipped', phone_id=p.id) }}">
+              <input type="text" name="tracking_number" placeholder="Enter tracking number" required />
+              <button type="submit" class="btn">Mark as shipped</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

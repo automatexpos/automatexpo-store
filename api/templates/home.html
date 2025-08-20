@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Modern Filter Bar for home.html -->
+<form method="get" class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-icon">📂</span>
+
+    <select name="category" class="input filter-select">
+      <option value="">All Categories</option>
+      <option value="Mobile Phones" {{ 'selected' if request.args.get('category') == 'Mobile Phones' else '' }}>Mobile Phones</option>
+      <option value="Cosmetics" {{ 'selected' if request.args.get('category') == 'Cosmetics' else '' }}>Cosmetics</option>
+      <option value="Clothes" {{ 'selected' if request.args.get('category') == 'Clothes' else '' }}>Clothes</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-icon">↕️</span>
+
+    <select name="sort" class="input filter-select">
+      <option value="">Sort By</option>
+      <option value="price_asc" {{ 'selected' if request.args.get('sort') == 'price_asc' else '' }}>Price: Low to High</option>
+      <option value="price_desc" {{ 'selected' if request.args.get('sort') == 'price_desc' else '' }}>Price: High to Low</option>
+    </select>
+  </div>
+  <div class="filter-group" style="flex:1;">
+      <span class="filter-icon">🔎</span>
+
+    <input type="text" name="search" class="input filter-search" placeholder="Search (e.g. iPhone)" value="{{ request.args.get('search', '') }}">
+  </div>
+  <button class="btn filter-btn" type="submit">Apply</button>
+</form>
+
+<div class="header">
+  <h1>In Stock Products</h1>
+  <!-- <a class="btn secondary" href="/account/booked">View orders</a> -->
+</div>
+<div class="grid cols-3">
+  {% for p in phones %}
+  <div class="card">
+    <div class="media-strip">
+      {% for m in p.media %}
+        {% if m.kind == 'image' %}
+          <img src="{{ m.url }}" alt="{{ p.model }}" />
+        {% else %}
+          <video src="{{ m.url }}" controls></video>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <h2>{{ p.model }}</h2>
+    <div class="badge">{{ p.condition }}</div>
+    <p style="opacity:.85; white-space:pre-wrap">{{ p.specs }}</p>
+    <p class="price">PKR {{ '%.0f'|format(p.price) }}</p>
+    <div style="display:flex; gap:5px;">
+      <a href="{{ url_for('phone_detail', phone_id=p.id) }}" class="btn">View</a>
+      <form method="post" action="{{ url_for('add_to_cart', phone_id=p.id) }}">
+        <button type="submit" class="btn">Add to Cart</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+</div>
+{% endblock %}

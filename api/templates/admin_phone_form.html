@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-card card">
+  <h2>{{ 'Edit' if phone else 'Add New' }} Item</h2>
+  <form method="post">
+    <div class="field"><div class="label">Item</div><input class="input" name="model" value="{{ phone.model if phone }}" required></div>
+    <div class="field"><div class="label">Specs</div><textarea class="input" name="specs" rows="4">{{ phone.specs if phone }}</textarea></div>
+    <div class="field"><div class="label">Condition</div><input class="input" name="condition" value="{{ phone.condition if phone }}" required></div>
+    <div class="field"><div class="label">Price (PKR)</div><input class="input" type="number" name="price" value="{{ phone.price if phone }}" required></div>
+    <div class="field"><div class="label">Media URLs (Cloudinary) — one per line</div><textarea class="input" name="media" rows="4">{% for m in media %}{{ m.url }}\n{% endfor %}</textarea></div>
+    <button class="btn">Save</button>
+  </form>
+</div>
+{% endblock %}

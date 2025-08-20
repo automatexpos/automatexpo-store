@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Confirm Payment</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" name="buyer_name" required>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" name="buyer_email" required>
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" name="buyer_phone" required>
+    </div>
+    <div class="field">
+      <label>Address</label>
+      <textarea name="buyer_address" required></textarea>
+    </div>
+
+    <hr>
+    <h3>💳 Seller Payment Details</h3>
+    {% if admin %}
+      <div class="field">
+        <p><strong>Seller:</strong> {{ admin.username }}</p>
+        {% if admin.easypaisa_number %}
+          <p><strong>Easypaisa:</strong> {{ admin.easypaisa_number }}</p>
+        {% endif %}
+        {% if admin.bank_name and admin.bank_account %}
+          <p><strong>Bank:</strong> {{ admin.bank_name }} ({{ admin.bank_account }})</p>
+        {% endif %}
+      </div>
+
+      <div class="field">
+        <label>Select Payment Method</label><br>
+        {% if admin.easypaisa_number %}
+          <label><input type="radio" name="payment_method" value="easypaisa" required> Easypaisa</label><br>
+        {% endif %}
+        {% if admin.bank_account %}
+          <label><input type="radio" name="payment_method" value="bank" required> Bank Transfer</label><br>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="field">
+      <label>Upload Screenshot of Payment</label>
+      <input type="file" name="receipt" required>
+    </div>
+
+    {% if phones %}
+    <hr>
+    <h3>🛒 Order Summary</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in phones %}
+        <tr>
+          <td>{{ p.model }}</td>
+          <td>{{ p.price }}</td>
+          <td>1</td>
+          <td>{{ p.price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><strong>Grand Total</strong></td>
+          <td><strong>{{ total_price }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% endif %}
+
+    <button class="btn">Submit Payment</button>
+  </form>
+</div>
+{% endblock %}

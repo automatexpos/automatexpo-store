@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid" style="grid-template-columns: 1.2fr .8fr; gap: 24px;">
+  <div class="card">
+    <div class="media-strip">
+      {% for m in media %}
+      {% if m.kind == 'image' %}
+      <img src="{{ m.url }}" alt="{{ phone.model }}" />
+      {% else %}
+      <video src="{{ m.url }}" controls></video>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <h2>{{ phone.model }}</h2>
+    <div class="badge">{{ phone.condition }}</div>
+    <p style="opacity:.85; white-space:pre-wrap">{{ phone.specs }}</p>
+  </div>
+
+  <div class="card">
+    <!-- Payment Flow -->
+    <h3>Buy this Item</h3>
+    <p class="price">PKR {{ '%.0f'|format(phone.price) }}</p>
+
+    {% if phone.status == 'Sold' %}
+    <div class="badge">This phone is sold</div>
+    {% else %}
+    <!-- Commenting out Book for 5 minutes -->
+    {#
+    {% if phone.status == 'Available' %}
+    <button class="btn">Book for 5 minutes</button>
+    {% elif phone.status == 'Booked' and phone.buyer_email == session.get('user_email') %}
+    <a class="btn" href="{{ url_for('payment', phone_id=phone.id) }}">Confirm token payment</a>
+    {% endif %}
+    #}
+
+    <!-- New Buy Now button -->
+    <a class="btn" href="{{ url_for('payment', phone_id=phone.id) }}">Buy Now</a>
+    {% endif %}
+
+    <p style="font-size:12px;color:var(--muted)">
+      Payment is manual. Admin will verify your payment and mark as Sold.
+    </p>
+  </div>
+</div>
+{% endblock %}

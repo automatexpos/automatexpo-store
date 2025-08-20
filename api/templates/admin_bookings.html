@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>⏳ Pending Payments</h2>
+{% if pending %}
+  <ul class="list">
+    {% for p in pending %}
+      <li>
+        <strong>{{ p.model }}</strong> — {{ p.buyer_email }}
+        (Submitted at {% if p.purchase_time %}{{ p.purchase_time.strftime("%m/%d/%Y %I:%M %p") }}{% endif %})
+        <a class="btn warn" href="{{ url_for('admin_review', phone_id=p.id) }}">Review</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No pending payments.</p>
+{% endif %}
+
+<hr>
+
+<h2>📦 Sold Phones</h2>
+{% if sold %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Buyer</th>
+        <th>Sold At</th>
+        <th>Shipping Status</th>
+        <th>Tracking #</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in sold %}
+    <tr>
+      <td>{{ p.model }}</td>
+      <td>{{ p.buyer_email }}</td>
+      <td>{{ p.selling_time|format_dt if p.selling_time }}</td>
+      <td>{{ p.shipping_status }}</td>
+      <td>
+        {% if p.tracking_number %}
+          {{ p.tracking_number }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td>
+        {% if p.status != 'Sold' %}
+          <form method="post" action="{{ url_for('mark_sold', phone_id=p.id) }}">
+            <button class="btn success" type="submit">Mark as Sold</button>
+          </form>
+        {% else %}
+          <span class="badge">Sold</span>
+        {% endif %}
+        {% if p.status == 'Sold' %}
+          {% if p.shipping_status == 'Shipped' %}
+            <span class="badge">Already Shipped</span>
+          {% else %}
+            <form method="post" action="{{ url_for('mark_shipped', phone_id=p.id) }}">
+              <input type="text" name="tracking_number" placeholder="Enter tracking number" required />
+              <button type="submit" class="btn">Mark as shipped</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </td>
+    </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No sold phones yet.</p>
+{% endif %}
+
+{% endblock %}

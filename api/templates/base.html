@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xpo Store</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+<div class="nav">
+      <a href="{{ url_for('home') }}" class="brand">
+        <img src="/static/logo.png" alt="Store Logo" class="brand-logo">
+        <span class="brand-text">Xpo Store</span>
+      </a>
+      <div>
+        {% if session.get('user_email') %}
+          <!-- Normal user is logged in -->
+          <span class="badge">{{ session['user_email'] }}</span>
+          <!-- <a class="btn secondary" href="{{ url_for('account_booked') }}">Booked</a> -->
+          <div>
+            <a href="{{ url_for('account_purchased') }}" class="btn">Purchased</a>
+            <a href="{{ url_for('view_cart') }}" class="btn">Cart</a>
+          </div>
+
+
+          <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a>
+
+        {% elif session.get('is_admin') %}
+          <!-- Admin is logged in -->
+          <span class="badge">Admin</span>
+          <a class="btn warning" href="{{ url_for('admin_bookings') }}">Admin Bookings</a>
+          <a class="btn warning" href="{{ url_for('admin_items') }}">Add Items</a>
+          <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a>
+
+        {% else %}
+          <!-- No one is logged in -->
+          <a class="btn secondary" href="{{ url_for('signup') }}">Sign up</a>
+          <a class="btn" href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="grid">
+          {% for category, msg in messages %}
+          <div class="card" role="alert">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <div class="footer">© {{ now().year }} Xpo Store — PKR prices. Pakistan Standard Time.</div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
