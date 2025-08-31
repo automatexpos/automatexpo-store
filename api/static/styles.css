@@ -1,3 +1,4 @@
+/* Cloud */
 /* ===============================
    1. Base Reset & Typography
    =============================== */
@@ -30,9 +31,9 @@ a:hover {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 5px;
 }
 
 /* ===============================
@@ -350,15 +351,6 @@ a:hover {
    7. Payment Page Layout
    =============================== */
 
-/* Grid wrapper */
-.payment-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr; /* form takes more space, summary smaller */
-  gap: 24px;
-  margin-top: 20px;
-  align-items: start;
-}
-
 /* Order summary card */
 .order-summary {
   position: sticky;
@@ -389,8 +381,8 @@ a:hover {
 /* Only affect forms inside .card / .form-card so filter bar stays untouched */
 .card form,
 .form-card {
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .card .field,

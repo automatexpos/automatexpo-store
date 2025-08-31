@@ -7,12 +7,17 @@ import smtplib
 from email.message import EmailMessage
 import random
 import string
+import stripe
+from flask import jsonify
+
 # -------------------------
 # CONFIG
 # -------------------------
 ADMIN_EMAIL = "automatexpos@gmail.com"
 APP_EMAIL = "automatexpos@gmail.com"
 APP_PASSWORD = "npul lior kqcv tvat"  # Gmail App Password
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
 
 BOOK_WINDOW_MINUTES = 5
 PK_TZ = timezone(timedelta(hours=5))  # Pakistan Standard Time
@@ -894,6 +899,95 @@ def admin_sold():
     sold = parse_datetime_fields(sold)   # <-- format dates properly
 
     return render_template('admin_sold.html', sold=sold)
+
+
+@app.post("/create-checkout-session")
+def create_checkout_session():
+    data = request.get_json()
+    buyer_email = (data.get("buyer_email") or "").strip()
+
+    # Early validation
+    if not buyer_email or "@" not in buyer_email:
+        return jsonify({"error": f"Invalid or missing email: {buyer_email}"}), 400
+
+    buyer_name = data.get("buyer_name")
+    buyer_phone = data.get("buyer_phone")
+    buyer_address = data.get("buyer_address")
+    phone_ids = data.get("phone_ids", [])
+
+    # Debug: log what we got
+    print("Received checkout data:", data)
+
+    # Fetch phones from Supabase
+    phones = supabase.table("phones").select("*").in_("id", phone_ids).execute().data
+    if not phones:
+        return jsonify({"error": "No valid phones found"}), 400
+
+    line_items = []
+    for p in phones:
+        line_items.append({
+            "price_data": {
+                "currency": "usd",
+                "product_data": {"name": p["model"]},
+                "unit_amount": int(float(p["price"]) * 100),
+            },
+            "quantity": 1,
+        })
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=line_items,
+        mode="payment",
+        customer_email=buyer_email,
+        metadata={
+            "buyer_name": buyer_name,
+            "buyer_phone": buyer_phone,
+            "buyer_address": buyer_address,
+            "phone_ids": ",".join(str(pid) for pid in phone_ids),
+        },
+        success_url=url_for("stripe_success", _external=True) + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=url_for("payment", _external=True) + f"?cart_ids={','.join(map(str, phone_ids))}",
+    )
+    return jsonify({"id": session.id})
+
+@app.route("/success", methods=["GET"])
+def stripe_success():
+    session_id = request.args.get("session_id")
+    if not session_id:
+        flash("Missing session_id from Stripe.", "error")
+        return redirect(url_for("home"))
+
+    try:
+        session_obj = stripe.checkout.Session.retrieve(session_id)
+    except Exception as e:
+        flash("Error verifying Stripe session: " + str(e), "error")
+        return redirect(url_for("home"))
+
+    if session_obj.payment_status == "paid":
+        buyer_name = session_obj.metadata.get("buyer_name")
+        buyer_email = session_obj.customer_email
+        buyer_phone = session_obj.metadata.get("buyer_phone")
+        buyer_address = session_obj.metadata.get("buyer_address")
+        phone_ids = session_obj.metadata.get("phone_ids", "").split(",")
+
+        for pid in phone_ids:
+            supabase.table("phones").update({
+                "buyer_name": buyer_name,
+                "buyer_email": buyer_email,
+                "buyer_phone": buyer_phone,
+                "buyer_address": buyer_address,
+                "payment_method": "Stripe",
+                "payment_status": "Full paid",
+                "status": "Sold",     # or "Booked" if you want manual confirmation
+                "full_payment": True,
+                "purchase_time": datetime.utcnow().isoformat(),
+            }).eq("id", int(pid)).execute()
+
+        flash("Stripe payment successful! Your order has been recorded.", "ok")
+        return redirect(url_for("account_purchased"))
+    else:
+        flash("Stripe payment not completed.", "error")
+        return redirect(url_for("home"))
 
 
 # -------------------------

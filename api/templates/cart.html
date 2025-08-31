@@ -22,7 +22,7 @@
             <tr>
               <td><input type="checkbox" name="selected_items" value="{{ p.id }}" class="item-checkbox"></td>
               <td>{{ p.model }}</td>
-              <td>PKR {{ p.price }}</td>
+              <td>${{ p.price }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -42,7 +42,7 @@
       <h3>Order Summary</h3>
       <ul id="summaryList"></ul>
       <hr>
-      <p><strong>Total:</strong> PKR <span id="summaryTotal">0</span></p>
+      <p><strong>Total:</strong> $<span id="summaryTotal">0</span></p>
       <button id="buySelectedBtn" type="submit" form="cartForm" class="btn full" style="display: none;">Buy Selected</button>
     </div>
   </div>
@@ -68,7 +68,7 @@
         anyChecked = true;
         const item = items.find(i => i.id == cb.value); 
         if(item) {
-          summaryList.innerHTML += `<li>${item.model} — PKR ${item.price}</li>`;
+          summaryList.innerHTML += `<li>${item.model} — $${item.price}</li>`;
           total += item.price;
         }
       }

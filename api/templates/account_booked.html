@@ -17,7 +17,7 @@
     {% for p in phones if p.payment_status == 'Token paid' %}
     <tr>
       <td><a href="/phone/{{ p.id }}">{{ p.model }}</a></td>
-      <td>PKR {{ '%.0f'|format(p.price) }}</td>
+      <td>${{ '%.0f'|format(p.price) }}</td>
       <td>{{ p.payment_status }}</td>
       <td>
         {% if p.booking_time %}

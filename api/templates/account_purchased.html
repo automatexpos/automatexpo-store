@@ -9,7 +9,7 @@
     {% for p in phones %}
     <tr>
       <td>{{ p.model }}</td>
-      <td>PKR {{ '%.0f'|format(p.price) }}</td>
+      <td>${{ '%.0f'|format(p.price) }}</td>
       <td>{% if p.full_payment %}Full{% else %}Token{% endif %}</td>
       <td>{{ p.payment_status }}</td>
       <td>{{ p.shipping_status }}</td>

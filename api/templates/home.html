@@ -49,7 +49,7 @@
     <h2>{{ p.model }}</h2>
     <div class="badge">{{ p.condition }}</div>
     <p style="opacity:.85; white-space:pre-wrap">{{ p.specs }}</p>
-    <p class="price">PKR {{ '%.0f'|format(p.price) }}</p>
+    <p class="price">${{ '%.0f'|format(p.price) }}</p>
     <div class="actions">
       <a href="{{ url_for('phone_detail', phone_id=p.id) }}" class="btn">View</a>
       <form method="post" action="{{ url_for('add_to_cart', phone_id=p.id) }}">

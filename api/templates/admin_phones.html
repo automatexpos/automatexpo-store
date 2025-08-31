@@ -11,7 +11,7 @@
     <tr>
       <td>{{ p.id }}</td>
       <td>{{ p.model }}</td>
-      <td>PKR {{ '%.0f'|format(p.price) }}</td>
+      <td>${{ '%.0f'|format(p.price) }}</td>
       <td>{{ p.status }}</td>
       <td>{{ p.buyer_email or '-' }}</td>
       <td>

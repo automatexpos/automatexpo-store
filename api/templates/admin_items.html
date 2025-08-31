@@ -22,7 +22,7 @@
     <tr>
       <td>{{ p.id }}</td>
       <td>{{ p.model }}</td>
-      <td>PKR {{ '%.0f'|format(p.price) }}</td>
+      <td>${{ '%.0f'|format(p.price) }}</td>
       <td>
         {% if p.status == "In Stock" %}
           <span class="badge success">{{ p.status }}</span>

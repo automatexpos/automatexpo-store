@@ -1,93 +1,272 @@
 {% extends 'base.html' %}
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-<div class="grid payment-grid">
-  <!-- Left: Payment Form -->
-  <div class="card">
-    <h2>Confirm Payment</h2>
 
-      <div class="field">
-        <label>Full Name</label>
-        <input type="text" name="buyer_name" required>
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" name="buyer_email" required>
-      </div>
-      <div class="field">
-        <label>Phone</label>
-        <input type="text" name="buyer_phone" required>
-      </div>
-      <div class="field">
-        <label>Address</label>
-        <input name="buyer_address" required>
-      </div>
-
-      <hr>
-      <h3>💳 Seller Payment Details</h3>
-      {% if admin %}
+<div style="max-width: 100%; padding: 0 5px;">
+  <!-- Use the existing payment-grid class from your CSS -->
+  <div class="payment-grid" style="max-width: 100%; margin: 20px 0;">
+    
+    <!-- Left: Buyer Details -->
+    <div class="card form-card">
+      <h2 class="text-2xl font-bold mb-6 flex items-center">
+        <span class="mr-3">👤</span>
+        Your Information
+      </h2>
+      <form id="payment-form">
         <div class="field">
-          <p><strong>Seller:</strong> {{ admin.username }}</p>
-          {% if admin.easypaisa_number %}
-            <p><strong>Easypaisa:</strong> {{ admin.easypaisa_number }}</p>
-          {% endif %}
-          {% if admin.bank_name and admin.bank_account %}
-            <p><strong>Bank:</strong> {{ admin.bank_name }} ({{ admin.bank_account }})</p>
-          {% endif %}
+          <label class="label">Full Name</label>
+          <input type="text" name="buyer_name" required class="input" placeholder="Enter your full name">
+        </div>
+        <div class="field">
+          <label class="label">Email</label>
+          <input type="email" name="buyer_email" required class="input" placeholder="Enter your email">
+        </div>
+        <div class="field">
+          <label class="label">Phone</label>
+          <input type="text" name="buyer_phone" required class="input" placeholder="Enter your phone number">
+        </div>
+        <div class="field">
+          <label class="label">Address</label>
+          <input type="text" name="buyer_address" required class="input" placeholder="Enter your address">
+        </div>
+      </form>
+    </div>
+
+    <!-- Right: Order Summary + Payment -->
+    {% if phones %}
+    <div class="order-summary">
+      <div class="card">
+        <!-- Order Summary Section -->
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center;">
+          <span style="margin-right: 8px;">🛒</span>
+          Order Summary
+        </h3>
+        
+        <div class="table-container" style="margin-bottom: 24px;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th style="text-align: center;">Price</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: center;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in phones %}
+              <tr>
+                <td style="font-weight: 500;">{{ p.model }}</td>
+                <td style="text-align: center;">${{ p.price }}</td>
+                <td style="text-align: center;">1</td>
+                <td style="text-align: center; font-weight: 600;">${{ p.price }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="text-align: right; font-weight: 700; font-size: 1.1rem;">Grand Total</td>
+                <td style="text-align: center; font-weight: 700; font-size: 1.1rem; color: #2563eb;">${{ total_price }}</td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
 
-        <div class="field">
-          <label>Select Payment Method</label>
-          {% if admin.easypaisa_number %}
-            <label><input type="radio" name="payment_method" value="easypaisa" required> Easypaisa</label>
-          {% endif %}
-          {% if admin.bank_account %}
-            <label><input type="radio" name="payment_method" value="bank" required> Bank Transfer</label>
-          {% endif %}
+        <!-- Payment Method Section -->
+        <div style="border-top: 2px solid #f1f5f9; padding-top: 20px;">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center;">
+            <span style="margin-right: 8px;">💳</span>
+            Select Payment Method
+          </h3>
+          
+          <div style="margin-bottom: 20px;">
+            <label class="payment-option" onclick="selectMethod('stripe')" style="display: block; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s ease; background: white;">
+              <input type="radio" name="payment_method" value="stripe" id="stripe-option" style="display: none;">
+              <div style="display: flex; align-items: center;">
+                <div class="radio-indicator" style="width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+                  <div class="radio-dot" style="width: 10px; height: 10px; background: #2563eb; border-radius: 50%; opacity: 0; transition: opacity 0.2s ease;"></div>
+                </div>
+                <span style="font-weight: 500; font-size: 0.95rem;">💳 Pay with Card</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Stripe Pay Button -->
+          <button id="pay-now" class="btn full"
+            style="display: none; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #ec4899 100%); 
+                   color: white; font-weight: 600; font-size: 1rem; padding: 14px 20px; 
+                   border: none; border-radius: 9999px; cursor: pointer; 
+                   transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+            <span style="display: flex; align-items: center; justify-content: center;">
+              <span style="margin-right: 8px;">🚀</span>
+              Confirm & Pay Now
+            </span>
+          </button>
         </div>
-      {% endif %}
-
-      <div class="field">
-        <label>Upload Screenshot of Payment</label>
-        <input type="file" name="receipt" required>
       </div>
+    </div>
+    {% endif %}
   </div>
-
-  <!-- Right: Order Summary -->
-  {% if phones %}
-  <div class="card order-summary">
-    <h3>🛒 Order Summary</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Price</th>
-          <th>Qty</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in phones %}
-        <tr>
-          <td>{{ p.model }}</td>
-          <td>{{ p.price }}</td>
-          <td>1</td>
-          <td>{{ p.price }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3"><strong>Grand Total</strong></td>
-          <td><strong>{{ total_price }}</strong></td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <!-- Submit Button under order summary -->
-    <button type="submit" class="btn" style="margin-top: 1rem;">Submit Payment</button>
-  </div>
-  {% endif %}
 </div>
-</form>
+
+<!-- Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("pk_test_51S1sq47x5pomh7vjUtwph7qn8sLjYkde2izfo9paxMCuQfez0hcrEJYdAu21P1mw9mTiYnumBNo3EiXsxxLJWQMy00sSVrfUYS");
+  const phoneIds = JSON.parse(`{{ phones | map(attribute="id") | list | tojson | safe }}`);
+
+  function selectMethod(method) {
+    const stripeBtn = document.getElementById("pay-now");
+    const radioOption = document.getElementById("stripe-option");
+    const radioDot = document.querySelector(".radio-dot");
+    const radioIndicator = document.querySelector(".radio-indicator");
+    const paymentOption = document.querySelector(".payment-option");
+    
+    if (method === "stripe") {
+      stripeBtn.style.display = "block";
+      radioOption.checked = true;
+      radioDot.style.opacity = "1";
+      radioIndicator.style.borderColor = "#2563eb";
+      radioIndicator.style.background = "#f0f4ff";
+      paymentOption.style.borderColor = "#2563eb";
+      paymentOption.style.background = "#f8faff";
+    }
+  }
+
+  // Hover effects for payment option
+  document.querySelector(".payment-option").addEventListener("mouseenter", function() {
+    if (!document.getElementById("stripe-option").checked) {
+      this.style.borderColor = "#9ca3af";
+      this.style.background = "#f9fafb";
+    }
+  });
+
+  document.querySelector(".payment-option").addEventListener("mouseleave", function() {
+    if (!document.getElementById("stripe-option").checked) {
+      this.style.borderColor = "#e5e7eb";
+      this.style.background = "white";
+    }
+  });
+
+  // Button hover effects
+  document.getElementById("pay-now").addEventListener("mouseenter", function() {
+    this.style.transform = "translateY(-2px)";
+    this.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.4)";
+  });
+
+  document.getElementById("pay-now").addEventListener("mouseleave", function() {
+    this.style.transform = "translateY(0)";
+    this.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.3)";
+  });
+
+  document.getElementById("pay-now").addEventListener("click", async () => {
+    const form = document.getElementById("payment-form");
+    const formData = new FormData(form);
+
+    const required = ["buyer_name", "buyer_email", "buyer_phone", "buyer_address"];
+    for (const field of required) {
+      if (!formData.get(field)) {
+        alert("Please fill all buyer details before proceeding.");
+        return;
+      }
+    }
+    const buyer = Object.fromEntries(formData.entries());
+    buyer.phone_ids = phoneIds;
+
+    try {
+      const res = await fetch("/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buyer)
+      });
+
+      const data = await res.json();
+      if (data.id) {
+        await stripe.redirectToCheckout({ sessionId: data.id });
+      } else {
+        alert("Failed to create Stripe session: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Stripe checkout error:", err);
+      alert("Something went wrong starting checkout.");
+    }
+  });
+</script>
+
+<!-- Additional CSS to ensure proper mobile responsiveness and force wider layout -->
+<style>
+  /* Override container restrictions */
+  .container {
+    max-width: none !important;
+    padding: 0 5px !important;
+    width: 100% !important;
+  }
+
+  /* Fix input field sizing to stay within card boundaries */
+  .card .input,
+  .form-card .input,
+  .card textarea,
+  .form-card textarea,
+  .card select,
+  .form-card select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 14px !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 9999px !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Ensure form fields container has proper sizing */
+  .field {
+    margin-bottom: 16px !important;
+    width: 100% !important;
+  }
+
+  @media (max-width: 768px) {
+    .payment-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+    
+    .order-summary {
+      position: static !important;
+      top: auto !important;
+    }
+  }
+  
+  /* Force the payment grid to use full width */
+  .payment-grid {
+    display: grid !important;
+    grid-template-columns: 2.5fr 1fr !important;
+    gap: 50px !important;
+    margin-top: 5px !important;
+    align-items: start !important;
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  
+  /* Make form cards wider */
+  .card.form-card {
+    max-width: none !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .card.form-card form {
+    max-width: none !important;
+    width: 100% !important;
+  }
+  
+  .order-summary {
+    position: sticky !important;
+    top: 20px !important;
+    width: 100% !important;
+  }
+
+  /* Override any parent container restrictions */
+  body > * {
+    max-width: none !important;
+  }
+</style>
+
 {% endblock %}
